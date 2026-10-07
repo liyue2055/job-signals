@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Signals — JD analysis</title>
+<style>
+*{box-sizing:border-box}body{font-family:Georgia,'Times New Roman',serif;background:#f7f2e9;color:#2b2620;margin:0;line-height:1.7}
+body:lang(zh-CN){font-family:"Noto Serif SC","Songti SC",Georgia,serif}
+header{text-align:center;padding:44px 20px 16px;max-width:960px;margin:0 auto}
+.kicker{font-size:.8rem;letter-spacing:3px;color:#b39b6d;text-transform:uppercase}
+h1{font-size:2rem;margin:10px 0 6px}p.sub{color:#8a7f6d;font-style:italic;margin:0 0 16px}
+.lang-toggle{display:inline-flex;border:1px solid #d8cba8;border-radius:30px;overflow:hidden;background:#fffdf8}
+.lang-btn{font-family:ui-sans-serif,system-ui;font-size:.85rem;font-weight:700;padding:8px 22px;border:none;background:transparent;color:#8a7f6d;cursor:pointer}
+.lang-btn.active{background:#1b1e26;color:#fff}
+main{max-width:960px;margin:0 auto;padding:10px 20px 60px}
+.card{background:#fffdf8;border:1px solid #e8dfcd;border-radius:14px;padding:24px 28px;margin:22px 0;box-shadow:0 2px 10px rgba(90,70,40,.06)}
+h2{font-size:1.3rem;margin:0 0 12px}
+.stats{display:flex;gap:14px;flex-wrap:wrap}
+.stat{flex:1;min-width:150px;background:#f6f1e4;border-radius:10px;padding:14px 18px;text-align:center}
+.stat .v{font-size:1.9rem;font-weight:800}.stat .l{font-size:.82rem;color:#8a7f6d}
+.brow{display:flex;align-items:center;gap:12px;margin:9px 0}
+.blabel{width:130px;font-weight:700;font-size:.92rem}
+.btrack{flex:1;background:#efe7d3;border-radius:6px;height:16px}
+.bfill{background:linear-gradient(90deg,#3b82f6,#2dd4bf);height:16px;border-radius:6px}
+.bnum{width:60px;text-align:right;font-variant-numeric:tabular-nums}
+.tagrow{margin:6px 0 14px}.chip{display:inline-block;font-family:ui-sans-serif,system-ui;font-size:.82rem;background:#f1ead9;border-radius:16px;padding:4px 13px;margin:3px 6px 3px 0}.chip b{color:#1c5fd6}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #efe7d3;vertical-align:top}
+th{color:#8a7f6d;font-weight:700}td.sk{color:#6b5f45;font-size:.8rem}
+a{color:#0a66c2}footer{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;font-style:italic}
+h3{margin:16px 0 4px;font-size:1.05rem}
+</style>
+</head>
+<body>
+<header>
+<div class="kicker">JD analysis</div>
+<div class="lang-en"><h1>Job Signals</h1><p class="sub">What employers are hiring for — tracked twice daily from public job boards.</p></div>
+<div class="lang-zh" style="display:none"><h1>职位信号</h1><p class="sub">雇主们在招什么样的人——每天两次从公开招聘渠道追踪。</p></div>
+<div class="lang-toggle"><button class="lang-btn active" data-lang="en" onclick="setLang('en')">English</button><button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button></div>
+</header>
+<main>
+<div class="card">
+<div class="lang-en"><h2>Overview</h2></div>
+<div class="lang-zh" style="display:none"><h2>总览</h2></div>
+<div class="stats">
+<div class="stat"><div class="v">458</div><div class="l"><span class="lang-en">postings</span><span class="lang-zh" style="display:none">职位</span></div></div>
+<div class="stat"><div class="v">12</div><div class="l"><span class="lang-en">categories</span><span class="lang-zh" style="display:none">类别</span></div></div>
+<div class="stat"><div class="v">25</div><div class="l"><span class="lang-en">distinct skills</span><span class="lang-zh" style="display:none">技能关键词</span></div></div>
+</div>
+<p style="color:#8a7f6d;font-size:.85rem">Sources: ashby: 98, greenhouse: 360 · <span class="lang-en">Last pull</span><span class="lang-zh" style="display:none">上次抓取</span>: 2026-10-07 04:36:41 · <span class="lang-en">Generated</span><span class="lang-zh" style="display:none">生成于</span>: 2026-10-07 00:36</p>
+</div>
+<div class="card">
+<div class="lang-en"><h2>By category</h2></div>
+<div class="lang-zh" style="display:none"><h2>按类别</h2></div>
+<div class="brow"><div class="blabel"><span class="lang-en">engineering</span><span class="lang-zh" style="display:none">工程技术</span></div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bnum">186</div></div><div class="brow"><div class="blabel"><span class="lang-en">other</span><span class="lang-zh" style="display:none">其他</span></div><div class="btrack"><div class="bfill" style="width:50%"></div></div><div class="bnum">94</div></div><div class="brow"><div class="blabel"><span class="lang-en">sales</span><span class="lang-zh" style="display:none">销售</span></div><div class="btrack"><div class="bfill" style="width:49%"></div></div><div class="bnum">92</div></div><div class="brow"><div class="blabel"><span class="lang-en">support</span><span class="lang-zh" style="display:none">客户成功</span></div><div class="btrack"><div class="bfill" style="width:17%"></div></div><div class="bnum">32</div></div><div class="brow"><div class="blabel"><span class="lang-en">operations</span><span class="lang-zh" style="display:none">运营</span></div><div class="btrack"><div class="bfill" style="width:6%"></div></div><div class="bnum">12</div></div><div class="brow"><div class="blabel"><span class="lang-en">marketing</span><span class="lang-zh" style="display:none">市场营销</span></div><div class="btrack"><div class="bfill" style="width:5%"></div></div><div class="bnum">10</div></div><div class="brow"><div class="blabel"><span class="lang-en">product</span><span class="lang-zh" style="display:none">产品</span></div><div class="btrack"><div class="bfill" style="width:4%"></div></div><div class="bnum">8</div></div><div class="brow"><div class="blabel"><span class="lang-en">design</span><span class="lang-zh" style="display:none">设计</span></div><div class="btrack"><div class="bfill" style="width:3%"></div></div><div class="bnum">6</div></div><div class="brow"><div class="blabel"><span class="lang-en">legal</span><span class="lang-zh" style="display:none">法务</span></div><div class="btrack"><div class="bfill" style="width:3%"></div></div><div class="bnum">6</div></div><div class="brow"><div class="blabel"><span class="lang-en">data</span><span class="lang-zh" style="display:none">数据</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">5</div></div><div class="brow"><div class="blabel"><span class="lang-en">hr</span><span class="lang-zh" style="display:none">人力资源</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">4</div></div><div class="brow"><div class="blabel"><span class="lang-en">finance</span><span class="lang-zh" style="display:none">财务</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">3</div></div>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Top skills overall</h2></div>
+<div class="lang-zh" style="display:none"><h2>总体热门技能</h2></div>
+<div class="tagrow"><span class="chip">rag <b>70</b></span> <span class="chip">excel <b>55</b></span> <span class="chip">rust <b>37</b></span> <span class="chip">react <b>31</b></span> <span class="chip">typescript <b>31</b></span> <span class="chip">graphql <b>30</b></span> <span class="chip">postgres <b>29</b></span> <span class="chip">redis <b>29</b></span> <span class="chip">go <b>26</b></span> <span class="chip">sql <b>24</b></span> <span class="chip">ci/cd <b>23</b></span> <span class="chip">node.js <b>23</b></span> <span class="chip">swift <b>20</b></span> <span class="chip">kotlin <b>12</b></span> <span class="chip">figma <b>11</b></span></div>
+<div class="lang-en"><h2>Top skills by category</h2></div>
+<div class="lang-zh" style="display:none"><h2>各类别热门技能</h2></div>
+<h3><span class="lang-en">engineering</span><span class="lang-zh" style="display:none">工程技术</span></h3><div class="tagrow"><span class="chip">rag <b>70</b></span> <span class="chip">excel <b>55</b></span> <span class="chip">rust <b>37</b></span> <span class="chip">react <b>31</b></span> <span class="chip">typescript <b>31</b></span> <span class="chip">graphql <b>30</b></span> <span class="chip">postgres <b>29</b></span> <span class="chip">redis <b>29</b></span></div><h3><span class="lang-en">other</span><span class="lang-zh" style="display:none">其他</span></h3><div class="tagrow"><span class="chip">figma <b>3</b></span> <span class="chip">aws <b>2</b></span></div><h3><span class="lang-en">sales</span><span class="lang-zh" style="display:none">销售</span></h3><div class="tagrow"></div>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Newest postings</h2></div>
+<div class="lang-zh" style="display:none"><h2>最新职位</h2></div>
+<table><tr><th><span class="lang-en">Title</span><span class="lang-zh" style="display:none">职位</span></th><th><span class="lang-en">Company</span><span class="lang-zh" style="display:none">公司</span></th><th><span class="lang-en">Location</span><span class="lang-zh" style="display:none">地点</span></th><th><span class="lang-en">Category</span><span class="lang-zh" style="display:none">类别</span></th><th><span class="lang-en">Skills</span><span class="lang-zh" style="display:none">技能</span></th></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/6dd5500a-4bd4-4f57-ba09-7b07acefecf4" target="_blank" rel="noopener">Account Executive, Enterprise</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/cb8e77a6-4316-45c6-ac8d-7ade980cd65e" target="_blank" rel="noopener">Account Executive, Growth </a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/fb4b6076-b943-4d95-bb9b-a66aef8275f2" target="_blank" rel="noopener">Technical Recruiter</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag, rust</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/f272fc4a-91a7-4dcf-9cb5-3600ebaf14e1" target="_blank" rel="noopener">Analytics Engineer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>data pipeline, dbt, hubspot, llm, rag, rust</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/1aa6f672-5917-49aa-b015-70ebff901923" target="_blank" rel="noopener">Deal Desk</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/b32de590-06ce-47d4-8994-66b936df908d" target="_blank" rel="noopener">Production Designer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/5b9997fd-7507-4437-8fd7-14178c99ab5d" target="_blank" rel="noopener">Production Designer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/eac7f181-d658-4943-9430-51bae2bcd110" target="_blank" rel="noopener">Mobile Product Designer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>figma, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/cec84487-60f2-4216-a514-dcf190c86c1e" target="_blank" rel="noopener">Implementation Manager</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/b3346acf-44be-4565-b1c0-10d482d3ad4e" target="_blank" rel="noopener">Product Marketing Manager</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, go, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/c0abc97e-b4d7-4ad7-bd13-bc40f4023227" target="_blank" rel="noopener">Product Marketing Manager</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, go, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/370d9605-f02f-44f9-97fa-ebf769bed93d" target="_blank" rel="noopener">Customer Success Manager, Enterprise</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/820d0d5a-0930-475c-b494-23e18ad2aa68" target="_blank" rel="noopener">Product Support Specialist, Europe</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, javascript, rag, sql</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/62a4524c-75da-499e-b150-7f68ce9f2da3" target="_blank" rel="noopener">Developer Relations</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/1d652292-04d9-405c-8101-578efd020e94" target="_blank" rel="noopener">Developer Relations</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/d37b3d76-3080-47f9-8a19-60505573112c" target="_blank" rel="noopener">Solutions Engineer, Europe</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel, graphql, javascript, python, rag, sql</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/26c77e48-b4ef-455d-a02c-3ef68fc6f9f9" target="_blank" rel="noopener">Customer Success Manager, Growth</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>excel</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/ba8a41d2-4198-481a-a7f4-e09c5364ff7f" target="_blank" rel="noopener">Principal Product Designer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>figma, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/a264869e-f058-487c-ab7f-9b77dffa427c" target="_blank" rel="noopener">Senior / Staff Product Designer</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>figma, rag</td></tr>
+<tr><td><a href="https://jobs.ashbyhq.com/linear/b4a7764e-c680-4bdf-9956-dc78f2ca94d5" target="_blank" rel="noopener">Senior / Staff Product Engineer, AI</a></td><td>linear</td><td></td><td>engineering</td><td class='sk'>graphql, postgres, rag, react, redis, sql</td></tr>
+</table>
+</div>
+</main>
+<footer><span class="lang-en">Job Signals · automated collection twice daily · public job-board data</span><span class="lang-zh" style="display:none">职位信号 · 每天自动抓取两次 · 公开招聘渠道数据</span></footer>
+<script>
+function setLang(l){document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=(l==='en')?'':'none'});document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=(l==='zh')?'':'none'});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});document.documentElement.lang=(l==='zh')?'zh-CN':'en';}
+</script>
+</body>
+</html>

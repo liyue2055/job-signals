@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Generate index.html dashboard from jobs.db (bilingual, GitHub Pages ready)."""
+import sqlite3, json, html as ihtml
+from datetime import datetime
+
+CAT_ZH = {"engineering": "工程技术", "data": "数据", "product": "产品",
+    "design": "设计", "marketing": "市场营销", "sales": "销售",
+    "operations": "运营", "support": "客户成功", "finance": "财务",
+    "hr": "人力资源", "legal": "法务", "other": "其他"}
+
+def esc(s):
+    return ihtml.escape(s or "")
+
+con = sqlite3.connect("jobs.db")
+total = con.execute("SELECT COUNT(*) FROM postings").fetchone()[0]
+by_src = con.execute("SELECT source, COUNT(*) FROM postings GROUP BY source").fetchall()
+by_cat = con.execute(
+    "SELECT category, COUNT(*) FROM postings GROUP BY category ORDER BY 2 DESC").fetchall()
+max_cat = by_cat[0][1] if by_cat else 1
+
+# skills overall
+from collections import Counter
+skill_all = Counter()
+skill_cat = {}
+for cat, in con.execute("SELECT DISTINCT category FROM postings"):
+    skill_cat[cat] = Counter()
+for cat, skills in con.execute("SELECT category, skills FROM postings"):
+    try:
+        ss = json.loads(skills or "[]")
+    except Exception:
+        ss = []
+    for s in ss:
+        skill_all[s] += 1
+        skill_cat.setdefault(cat, Counter())[s] += 1
+top_skills = skill_all.most_common(15)
+
+newest = con.execute("""SELECT title, company, location, category, skills, url,
+    collected_at FROM postings ORDER BY collected_at DESC LIMIT 20""").fetchall()
+last_run = con.execute("SELECT MAX(run_at) FROM runs").fetchone()[0] or "—"
+con.close()
+
+def cat_bar(cat, n):
+    w = max(2, int(n / max_cat * 100))
+    zh = CAT_ZH.get(cat, cat)
+    return (f'<div class="brow"><div class="blabel"><span class="lang-en">{esc(cat)}</span>'
+            f'<span class="lang-zh" style="display:none">{esc(zh)}</span></div>'
+            f'<div class="btrack"><div class="bfill" style="width:{w}%"></div></div>'
+            f'<div class="bnum">{n}</div></div>')
+
+def chips(items):
+    return " ".join(f'<span class="chip">{esc(s)} <b>{c}</b></span>' for s, c in items)
+
+def posters(rows):
+    out = []
+    for title, comp, loc, cat, skills, url, _ in rows:
+        try:
+            ss = ", ".join(json.loads(skills or "[]")[:6])
+        except Exception:
+            ss = ""
+        link = f'<a href="{esc(url)}" target="_blank" rel="noopener">{esc(title)}</a>' if url else esc(title)
+        out.append(f"<tr><td>{link}</td><td>{esc(comp)}</td><td>{esc(loc)}</td>"
+                   f"<td>{esc(cat)}</td><td class='sk'>{esc(ss)}</td></tr>")
+    return "\n".join(out)
+
+top3 = [c for c, _ in by_cat[:3]]
+per_cat_html = ""
+for cat in top3:
+    zh = CAT_ZH.get(cat, cat)
+    per_cat_html += (f'<h3><span class="lang-en">{esc(cat)}</span>'
+                     f'<span class="lang-zh" style="display:none">{esc(zh)}</span></h3>'
+                     f'<div class="tagrow">{chips(skill_cat[cat].most_common(8))}</div>')
+
+now = datetime.now().strftime("%Y-%m-%d %H:%M")
+src_line = ", ".join(f"{s}: {n}" for s, n in by_src)
+
+page = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Signals — JD analysis</title>
+<style>
+*{{box-sizing:border-box}}body{{font-family:Georgia,'Times New Roman',serif;background:#f7f2e9;color:#2b2620;margin:0;line-height:1.7}}
+body:lang(zh-CN){{font-family:"Noto Serif SC","Songti SC",Georgia,serif}}
+header{{text-align:center;padding:44px 20px 16px;max-width:960px;margin:0 auto}}
+.kicker{{font-size:.8rem;letter-spacing:3px;color:#b39b6d;text-transform:uppercase}}
+h1{{font-size:2rem;margin:10px 0 6px}}p.sub{{color:#8a7f6d;font-style:italic;margin:0 0 16px}}
+.lang-toggle{{display:inline-flex;border:1px solid #d8cba8;border-radius:30px;overflow:hidden;background:#fffdf8}}
+.lang-btn{{font-family:ui-sans-serif,system-ui;font-size:.85rem;font-weight:700;padding:8px 22px;border:none;background:transparent;color:#8a7f6d;cursor:pointer}}
+.lang-btn.active{{background:#1b1e26;color:#fff}}
+main{{max-width:960px;margin:0 auto;padding:10px 20px 60px}}
+.card{{background:#fffdf8;border:1px solid #e8dfcd;border-radius:14px;padding:24px 28px;margin:22px 0;box-shadow:0 2px 10px rgba(90,70,40,.06)}}
+h2{{font-size:1.3rem;margin:0 0 12px}}
+.stats{{display:flex;gap:14px;flex-wrap:wrap}}
+.stat{{flex:1;min-width:150px;background:#f6f1e4;border-radius:10px;padding:14px 18px;text-align:center}}
+.stat .v{{font-size:1.9rem;font-weight:800}}.stat .l{{font-size:.82rem;color:#8a7f6d}}
+.brow{{display:flex;align-items:center;gap:12px;margin:9px 0}}
+.blabel{{width:130px;font-weight:700;font-size:.92rem}}
+.btrack{{flex:1;background:#efe7d3;border-radius:6px;height:16px}}
+.bfill{{background:linear-gradient(90deg,#3b82f6,#2dd4bf);height:16px;border-radius:6px}}
+.bnum{{width:60px;text-align:right;font-variant-numeric:tabular-nums}}
+.tagrow{{margin:6px 0 14px}}.chip{{display:inline-block;font-family:ui-sans-serif,system-ui;font-size:.82rem;background:#f1ead9;border-radius:16px;padding:4px 13px;margin:3px 6px 3px 0}}.chip b{{color:#1c5fd6}}
+table{{width:100%;border-collapse:collapse;font-size:.88rem}}
+th,td{{text-align:left;padding:9px 10px;border-bottom:1px solid #efe7d3;vertical-align:top}}
+th{{color:#8a7f6d;font-weight:700}}td.sk{{color:#6b5f45;font-size:.8rem}}
+a{{color:#0a66c2}}footer{{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;font-style:italic}}
+h3{{margin:16px 0 4px;font-size:1.05rem}}
+</style>
+</head>
+<body>
+<header>
+<div class="kicker">JD analysis</div>
+<div class="lang-en"><h1>Job Signals</h1><p class="sub">What employers are hiring for — tracked twice daily from public job boards.</p></div>
+<div class="lang-zh" style="display:none"><h1>职位信号</h1><p class="sub">雇主们在招什么样的人——每天两次从公开招聘渠道追踪。</p></div>
+<div class="lang-toggle"><button class="lang-btn active" data-lang="en" onclick="setLang('en')">English</button><button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button></div>
+</header>
+<main>
+<div class="card">
+<div class="lang-en"><h2>Overview</h2></div>
+<div class="lang-zh" style="display:none"><h2>总览</h2></div>
+<div class="stats">
+<div class="stat"><div class="v">{total}</div><div class="l"><span class="lang-en">postings</span><span class="lang-zh" style="display:none">职位</span></div></div>
+<div class="stat"><div class="v">{len(by_cat)}</div><div class="l"><span class="lang-en">categories</span><span class="lang-zh" style="display:none">类别</span></div></div>
+<div class="stat"><div class="v">{len(skill_all)}</div><div class="l"><span class="lang-en">distinct skills</span><span class="lang-zh" style="display:none">技能关键词</span></div></div>
+</div>
+<p style="color:#8a7f6d;font-size:.85rem">Sources: {esc(src_line)} · <span class="lang-en">Last pull</span><span class="lang-zh" style="display:none">上次抓取</span>: {esc(last_run)} · <span class="lang-en">Generated</span><span class="lang-zh" style="display:none">生成于</span>: {now}</p>
+</div>
+<div class="card">
+<div class="lang-en"><h2>By category</h2></div>
+<div class="lang-zh" style="display:none"><h2>按类别</h2></div>
+{"".join(cat_bar(c, n) for c, n in by_cat)}
+</div>
+<div class="card">
+<div class="lang-en"><h2>Top skills overall</h2></div>
+<div class="lang-zh" style="display:none"><h2>总体热门技能</h2></div>
+<div class="tagrow">{chips(top_skills)}</div>
+<div class="lang-en"><h2>Top skills by category</h2></div>
+<div class="lang-zh" style="display:none"><h2>各类别热门技能</h2></div>
+{per_cat_html}
+</div>
+<div class="card">
+<div class="lang-en"><h2>Newest postings</h2></div>
+<div class="lang-zh" style="display:none"><h2>最新职位</h2></div>
+<table><tr><th><span class="lang-en">Title</span><span class="lang-zh" style="display:none">职位</span></th><th><span class="lang-en">Company</span><span class="lang-zh" style="display:none">公司</span></th><th><span class="lang-en">Location</span><span class="lang-zh" style="display:none">地点</span></th><th><span class="lang-en">Category</span><span class="lang-zh" style="display:none">类别</span></th><th><span class="lang-en">Skills</span><span class="lang-zh" style="display:none">技能</span></th></tr>
+{posters(newest)}
+</table>
+</div>
+</main>
+<footer><span class="lang-en">Job Signals · automated collection twice daily · public job-board data</span><span class="lang-zh" style="display:none">职位信号 · 每天自动抓取两次 · 公开招聘渠道数据</span></footer>
+<script>
+function setLang(l){{document.querySelectorAll('.lang-en').forEach(function(e){{e.style.display=(l==='en')?'':'none'}});document.querySelectorAll('.lang-zh').forEach(function(e){{e.style.display=(l==='zh')?'':'none'}});document.querySelectorAll('.lang-btn').forEach(function(b){{b.classList.toggle('active',b.dataset.lang===l)}});document.documentElement.lang=(l==='zh')?'zh-CN':'en';}}
+</script>
+</body>
+</html>"""
+
+with open("index.html", "w") as f:
+    f.write(page)
+print(f"dashboard written: {total} postings, {len(by_cat)} categories, {len(skill_all)} skills")
