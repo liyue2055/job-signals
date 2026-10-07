@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Generate index.html dashboard from jobs.db (bilingual, GitHub Pages ready)."""
+"""Generate index.html dashboard from jobs.db — bilingual, with search,
+category filters and pagination (GitHub Pages / Vercel ready)."""
 import sqlite3, json, html as ihtml
 from datetime import datetime
+from collections import Counter
 
 CAT_ZH = {"engineering": "工程技术", "data": "数据", "product": "产品",
     "design": "设计", "marketing": "市场营销", "sales": "销售",
@@ -18,13 +20,12 @@ by_cat = con.execute(
     "SELECT category, COUNT(*) FROM postings GROUP BY category ORDER BY 2 DESC").fetchall()
 max_cat = by_cat[0][1] if by_cat else 1
 
-# skills overall
-from collections import Counter
 skill_all = Counter()
 skill_cat = {}
-for cat, in con.execute("SELECT DISTINCT category FROM postings"):
-    skill_cat[cat] = Counter()
-for cat, skills in con.execute("SELECT category, skills FROM postings"):
+rows = con.execute("""SELECT title, company, location, category, skills, url,
+    posted_at, description FROM postings ORDER BY collected_at DESC""").fetchall()
+data = []
+for title, comp, loc, cat, skills, url, posted, desc in rows:
     try:
         ss = json.loads(skills or "[]")
     except Exception:
@@ -32,10 +33,10 @@ for cat, skills in con.execute("SELECT category, skills FROM postings"):
     for s in ss:
         skill_all[s] += 1
         skill_cat.setdefault(cat, Counter())[s] += 1
+    data.append({"t": title, "co": comp, "loc": loc, "cat": cat, "sk": ss,
+                 "url": url, "posted": posted or "",
+                 "d": (desc or "")[:600]})
 top_skills = skill_all.most_common(15)
-
-newest = con.execute("""SELECT title, company, location, category, skills, url,
-    collected_at FROM postings ORDER BY collected_at DESC LIMIT 20""").fetchall()
 last_run = con.execute("SELECT MAX(run_at) FROM runs").fetchone()[0] or "—"
 con.close()
 
@@ -50,28 +51,17 @@ def cat_bar(cat, n):
 def chips(items):
     return " ".join(f'<span class="chip">{esc(s)} <b>{c}</b></span>' for s, c in items)
 
-def posters(rows):
-    out = []
-    for title, comp, loc, cat, skills, url, _ in rows:
-        try:
-            ss = ", ".join(json.loads(skills or "[]")[:6])
-        except Exception:
-            ss = ""
-        link = f'<a href="{esc(url)}" target="_blank" rel="noopener">{esc(title)}</a>' if url else esc(title)
-        out.append(f"<tr><td>{link}</td><td>{esc(comp)}</td><td>{esc(loc)}</td>"
-                   f"<td>{esc(cat)}</td><td class='sk'>{esc(ss)}</td></tr>")
-    return "\n".join(out)
-
 top3 = [c for c, _ in by_cat[:3]]
 per_cat_html = ""
 for cat in top3:
     zh = CAT_ZH.get(cat, cat)
     per_cat_html += (f'<h3><span class="lang-en">{esc(cat)}</span>'
                      f'<span class="lang-zh" style="display:none">{esc(zh)}</span></h3>'
-                     f'<div class="tagrow">{chips(skill_cat[cat].most_common(8))}</div>')
+                     f'<div class="tagrow">{chips(skill_cat.get(cat, Counter()).most_common(8))}</div>')
 
 now = datetime.now().strftime("%Y-%m-%d %H:%M")
 src_line = ", ".join(f"{s}: {n}" for s, n in by_src)
+json_data = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
 page = f"""<!doctype html>
 <html lang="en">
@@ -82,13 +72,13 @@ page = f"""<!doctype html>
 <style>
 *{{box-sizing:border-box}}body{{font-family:Georgia,'Times New Roman',serif;background:#f7f2e9;color:#2b2620;margin:0;line-height:1.7}}
 body:lang(zh-CN){{font-family:"Noto Serif SC","Songti SC",Georgia,serif}}
-header{{text-align:center;padding:44px 20px 16px;max-width:960px;margin:0 auto}}
+header{{text-align:center;padding:44px 20px 16px;max-width:1020px;margin:0 auto}}
 .kicker{{font-size:.8rem;letter-spacing:3px;color:#b39b6d;text-transform:uppercase}}
 h1{{font-size:2rem;margin:10px 0 6px}}p.sub{{color:#8a7f6d;font-style:italic;margin:0 0 16px}}
 .lang-toggle{{display:inline-flex;border:1px solid #d8cba8;border-radius:30px;overflow:hidden;background:#fffdf8}}
 .lang-btn{{font-family:ui-sans-serif,system-ui;font-size:.85rem;font-weight:700;padding:8px 22px;border:none;background:transparent;color:#8a7f6d;cursor:pointer}}
 .lang-btn.active{{background:#1b1e26;color:#fff}}
-main{{max-width:960px;margin:0 auto;padding:10px 20px 60px}}
+main{{max-width:1020px;margin:0 auto;padding:10px 20px 60px}}
 .card{{background:#fffdf8;border:1px solid #e8dfcd;border-radius:14px;padding:24px 28px;margin:22px 0;box-shadow:0 2px 10px rgba(90,70,40,.06)}}
 h2{{font-size:1.3rem;margin:0 0 12px}}
 .stats{{display:flex;gap:14px;flex-wrap:wrap}}
@@ -100,11 +90,22 @@ h2{{font-size:1.3rem;margin:0 0 12px}}
 .bfill{{background:linear-gradient(90deg,#3b82f6,#2dd4bf);height:16px;border-radius:6px}}
 .bnum{{width:60px;text-align:right;font-variant-numeric:tabular-nums}}
 .tagrow{{margin:6px 0 14px}}.chip{{display:inline-block;font-family:ui-sans-serif,system-ui;font-size:.82rem;background:#f1ead9;border-radius:16px;padding:4px 13px;margin:3px 6px 3px 0}}.chip b{{color:#1c5fd6}}
+.controls{{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;align-items:center}}
+.search{{flex:1;min-width:220px;font-family:ui-sans-serif,system-ui;font-size:.95rem;padding:10px 16px;border:1px solid #d8cba8;border-radius:24px;background:#fff;color:#2b2620}}
+.pill{{font-family:ui-sans-serif,system-ui;font-size:.82rem;font-weight:700;border:1px solid #d8cba8;background:#f6f1e4;color:#6b5f45;border-radius:20px;padding:7px 15px;cursor:pointer}}
+.pill.active{{background:#1b1e26;color:#fff;border-color:#1b1e26}}
+.pill .n{{opacity:.65;font-weight:400}}
 table{{width:100%;border-collapse:collapse;font-size:.88rem}}
 th,td{{text-align:left;padding:9px 10px;border-bottom:1px solid #efe7d3;vertical-align:top}}
 th{{color:#8a7f6d;font-weight:700}}td.sk{{color:#6b5f45;font-size:.8rem}}
-a{{color:#0a66c2}}footer{{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;font-style:italic}}
+a{{color:#0a66c2}}
+.pager{{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:18px;flex-wrap:wrap;font-family:ui-sans-serif,system-ui}}
+.pg{{border:1px solid #d8cba8;background:#fff;border-radius:8px;padding:6px 13px;cursor:pointer;font-size:.85rem;color:#2b2620}}
+.pg.active{{background:#1c5fd6;color:#fff;border-color:#1c5fd6}}
+.pg:disabled{{opacity:.4;cursor:default}}
+.count{{font-size:.85rem;color:#8a7f6d;font-family:ui-sans-serif,system-ui}}
 h3{{margin:16px 0 4px;font-size:1.05rem}}
+footer{{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;font-style:italic}}
 </style>
 </head>
 <body>
@@ -139,20 +140,87 @@ h3{{margin:16px 0 4px;font-size:1.05rem}}
 {per_cat_html}
 </div>
 <div class="card">
-<div class="lang-en"><h2>Newest postings</h2></div>
-<div class="lang-zh" style="display:none"><h2>最新职位</h2></div>
-<table><tr><th><span class="lang-en">Title</span><span class="lang-zh" style="display:none">职位</span></th><th><span class="lang-en">Company</span><span class="lang-zh" style="display:none">公司</span></th><th><span class="lang-en">Location</span><span class="lang-zh" style="display:none">地点</span></th><th><span class="lang-en">Category</span><span class="lang-zh" style="display:none">类别</span></th><th><span class="lang-en">Skills</span><span class="lang-zh" style="display:none">技能</span></th></tr>
-{posters(newest)}
-</table>
+<div class="lang-en"><h2>Browse postings</h2></div>
+<div class="lang-zh" style="display:none"><h2>浏览职位</h2></div>
+<div class="controls">
+<input id="q" class="search" placeholder="Search title, company, skill…" oninput="setQ(this.value)">
+</div>
+<div class="controls" id="pills"></div>
+<div class="count" id="count"></div>
+<table><thead><tr>
+<th><span class="lang-en">Title</span><span class="lang-zh" style="display:none">职位</span></th>
+<th><span class="lang-en">Company</span><span class="lang-zh" style="display:none">公司</span></th>
+<th><span class="lang-en">Location</span><span class="lang-zh" style="display:none">地点</span></th>
+<th><span class="lang-en">Skills</span><span class="lang-zh" style="display:none">技能</span></th>
+</tr></thead><tbody id="rows"></tbody></table>
+<div class="pager" id="pager"></div>
 </div>
 </main>
 <footer><span class="lang-en">Job Signals · automated collection twice daily · public job-board data</span><span class="lang-zh" style="display:none">职位信号 · 每天自动抓取两次 · 公开招聘渠道数据</span></footer>
 <script>
-function setLang(l){{document.querySelectorAll('.lang-en').forEach(function(e){{e.style.display=(l==='en')?'':'none'}});document.querySelectorAll('.lang-zh').forEach(function(e){{e.style.display=(l==='zh')?'':'none'}});document.querySelectorAll('.lang-btn').forEach(function(b){{b.classList.toggle('active',b.dataset.lang===l)}});document.documentElement.lang=(l==='zh')?'zh-CN':'en';}}
+var DATA = {json_data};
+var CATS = {json.dumps([c for c,_ in by_cat], ensure_ascii=False)};
+var CATN = {json.dumps({c: n for c,n in by_cat}, ensure_ascii=False)};
+var CATZH = {json.dumps(CAT_ZH, ensure_ascii=False)};
+var PER = 15, q = "", cat = "all", page = 1, lang = "en";
+function catName(c) {{ return lang === "zh" ? (CATZH[c] || c) : c; }}
+function filtered() {{
+  var ql = q.trim().toLowerCase();
+  return DATA.filter(function(p) {{
+    if (cat !== "all" && p.cat !== cat) return false;
+    if (!ql) return true;
+    var hay = (p.t + " " + p.co + " " + p.loc + " " + p.sk.join(" ")).toLowerCase();
+    return hay.indexOf(ql) >= 0;
+  }});
+}}
+function escH(s) {{ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }}
+function renderPills() {{
+  var h = '<button class="pill' + (cat==="all"?" active":"") + '" onclick="setCat(\\'all\\')">'
+    + (lang==="zh"?"全部":"All") + ' <span class="n">' + DATA.length + '</span></button>';
+  CATS.forEach(function(c) {{
+    h += '<button class="pill' + (cat===c?" active":"") + '" onclick="setCat(\\'' + c + '\\')">'
+      + escH(catName(c)) + ' <span class="n">' + CATN[c] + '</span></button>';
+  }});
+  document.getElementById("pills").innerHTML = h;
+}}
+function render() {{
+  var list = filtered();
+  var pages = Math.max(1, Math.ceil(list.length / PER));
+  if (page > pages) page = pages;
+  var start = (page - 1) * PER;
+  var rows = list.slice(start, start + PER).map(function(p) {{
+    var link = p.url ? '<a href="' + escH(p.url) + '" target="_blank" rel="noopener">' + escH(p.t) + '</a>' : escH(p.t);
+    return "<tr><td>" + link + "</td><td>" + escH(p.co) + "</td><td>" + escH(p.loc)
+      + "</td><td class='sk'>" + escH(p.sk.slice(0,6).join(", ")) + "</td></tr>";
+  }}).join("");
+  document.getElementById("rows").innerHTML = rows || '<tr><td colspan="4" style="text-align:center;color:#8a7f6d">'
+    + (lang==="zh" ? "没有匹配的职位" : "No matching postings") + "</td></tr>";
+  document.getElementById("count").textContent = list.length + (lang==="zh" ? " 个职位" : " postings");
+  var ph = '<button class="pg" ' + (page<=1?"disabled":"") + ' onclick="goPage(' + (page-1) + ')">‹</button>';
+  var lo = Math.max(1, page - 2), hi = Math.min(pages, page + 2);
+  for (var i = lo; i <= hi; i++) ph += '<button class="pg' + (i===page?" active":"") + '" onclick="goPage(' + i + ')">' + i + "</button>";
+  ph += '<button class="pg" ' + (page>=pages?"disabled":"") + ' onclick="goPage(' + (page+1) + ')">›</button>';
+  ph += '<span class="count">' + page + " / " + pages + "</span>";
+  document.getElementById("pager").innerHTML = ph;
+  renderPills();
+}}
+function setCat(c) {{ cat = c; page = 1; render(); }}
+function setQ(v) {{ q = v; page = 1; render(); }}
+function goPage(p) {{ page = p; render(); window.scrollTo({{top: document.getElementById("rows").offsetTop - 120, behavior: "smooth"}}); }}
+function setLang(l) {{
+  lang = l;
+  document.querySelectorAll('.lang-en').forEach(function(e){{e.style.display=(l==='en')?'':'none'}});
+  document.querySelectorAll('.lang-zh').forEach(function(e){{e.style.display=(l==='zh')?'':'none'}});
+  document.querySelectorAll('.lang-btn').forEach(function(b){{b.classList.toggle('active',b.dataset.lang===l)}});
+  document.documentElement.lang=(l==='zh')?'zh-CN':'en';
+  document.getElementById("q").placeholder = l==="zh" ? "搜索职位、公司、技能…" : "Search title, company, skill…";
+  render();
+}}
+render();
 </script>
 </body>
 </html>"""
 
 with open("index.html", "w") as f:
     f.write(page)
-print(f"dashboard written: {total} postings, {len(by_cat)} categories, {len(skill_all)} skills")
+print(f"dashboard written: {total} postings, {len(data)} embedded, {len(json_data)//1024}KB json")
