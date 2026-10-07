@@ -164,10 +164,11 @@ def ashby(con, board):
     con.commit()
     return len(jobs), ins, "ok"
 
+# 2026-10-07: notion/ramp migrated Greenhouse->Ashby; duolingo/netlify migrated Lever->Greenhouse
 SEEDS = [
-    ("greenhouse", "anthropic"), ("greenhouse", "figma"), ("greenhouse", "notion"),
-    ("greenhouse", "ramp"), ("greenhouse", "datadog"),
-    ("lever", "duolingo"), ("lever", "netlify"),
+    ("greenhouse", "anthropic"), ("greenhouse", "figma"), ("ashby", "notion"),
+    ("ashby", "ramp"), ("greenhouse", "datadog"),
+    ("greenhouse", "duolingo"), ("greenhouse", "netlify"),
     ("ashby", "ashby"), ("ashby", "linear"),
 ]
 FUNCS = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby}
