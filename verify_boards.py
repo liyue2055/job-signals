@@ -2,10 +2,10 @@
 """Verify candidate ATS board slugs against live public APIs.
 
 Usage:
-  python3 verify_boards.py                # verify /tmp/candidate_slugs.json
-  python3 verify_boards.py --in extra.json # verify additional candidates
-Writes verified slugs to verified_boards.json (merged).
-Polite: ~1 request per 1.5s.
+  python3 verify_boards.py --in slug_sources/all_candidates.json
+Writes verified slugs to verified_boards.json (merged) as {slug: job_count},
+so the seed-wiring step can keep only boards with real openings.
+Polite: ~1 request per 1.5s. Idempotent: skips SEEDS and already-verified slugs.
 """
 import json, sys, time
 sys.path.insert(0, ".")
@@ -43,10 +43,14 @@ def main():
     cands = json.load(open(in_path))
     try:
         verified = json.load(open("verified_boards.json"))
+        # normalize legacy list format to {slug: job_count}
+        for ats in list(verified):
+            if isinstance(verified[ats], list):
+                verified[ats] = {s: None for s in verified[ats]}
     except Exception:
-        verified = {"greenhouse": [], "lever": [], "ashby": []}
+        verified = {"greenhouse": {}, "lever": {}, "ashby": {}}
     have = {(s, b) for s, b in SEEDS} | {
-        (ats, s) for ats, lst in verified.items() for s in lst}
+        (ats, s) for ats, d in verified.items() for s in d}
 
     for ats, slugs in cands.items():
         if ats not in CHECKERS:
@@ -59,7 +63,7 @@ def main():
             print(f"{ats}:{slug} -> {'LIVE '+str(info)+' jobs' if ok else 'dead ('+str(info)+')'}",
                   flush=True)
             if ok:
-                verified.setdefault(ats, []).append(slug)
+                verified.setdefault(ats, {})[slug] = info if isinstance(info, int) else 0
                 have.add((ats, slug))
             with open("verified_boards.json", "w") as f:
                 json.dump(verified, f, indent=1)
