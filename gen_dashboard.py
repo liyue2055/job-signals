@@ -22,10 +22,11 @@ max_cat = by_cat[0][1] if by_cat else 1
 
 skill_all = Counter()
 skill_cat = {}
-rows = con.execute("""SELECT title, company, location, category, skills, url,
-    posted_at, description FROM postings ORDER BY collected_at DESC""").fetchall()
+rows = con.execute("""SELECT rowid, title, company, location, category, skills, url,
+    posted_at, description, source FROM postings ORDER BY collected_at DESC""").fetchall()
 data = []
-for title, comp, loc, cat, skills, url, posted, desc in rows:
+full = []
+for rid, title, comp, loc, cat, skills, url, posted, desc, src in rows:
     try:
         ss = json.loads(skills or "[]")
     except Exception:
@@ -33,9 +34,13 @@ for title, comp, loc, cat, skills, url, posted, desc in rows:
     for s in ss:
         skill_all[s] += 1
         skill_cat.setdefault(cat, Counter())[s] += 1
-    data.append({"t": title, "co": comp, "loc": loc, "cat": cat, "sk": ss,
+    data.append({"id": rid, "t": title, "co": comp, "loc": loc, "cat": cat, "sk": ss,
                  "url": url, "posted": posted or "",
                  "d": (desc or "")[:600]})
+    full.append({"id": rid, "title": title, "company": comp, "location": loc,
+                 "category": cat, "skills": ss, "url": url,
+                 "posted_at": posted or "", "source": src,
+                 "description": desc or ""})
 top_skills = skill_all.most_common(15)
 last_run = con.execute("SELECT MAX(run_at) FROM runs").fetchone()[0] or "—"
 con.close()
@@ -144,7 +149,10 @@ footer{{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;fon
 <div class="lang-zh" style="display:none"><h2>浏览职位</h2></div>
 <div class="controls">
 <input id="q" class="search" placeholder="Search title, company, skill…" oninput="setQ(this.value)">
+<button class="pill" onclick="doExport('csv')"><span class="lang-en">Export CSV</span><span class="lang-zh" style="display:none">导出 CSV</span></button>
+<button class="pill" onclick="doExport('json')"><span class="lang-en">Export JSON</span><span class="lang-zh" style="display:none">导出 JSON</span></button>
 </div>
+<div class="count" id="expnote"><span class="lang-en">Export downloads the current filtered view (up to 2,000 records).</span><span class="lang-zh" style="display:none">导出下载当前筛选结果（最多 2,000 条）。</span></div>
 <div class="controls" id="pills"></div>
 <div class="count" id="count"></div>
 <table><thead><tr>
@@ -207,6 +215,56 @@ function render() {{
 function setCat(c) {{ cat = c; page = 1; render(); }}
 function setQ(v) {{ q = v; page = 1; render(); }}
 function goPage(p) {{ page = p; render(); window.scrollTo({{top: document.getElementById("rows").offsetTop - 120, behavior: "smooth"}}); }}
+var EXPORT_CAP = 2000;
+function csvCell(v) {{
+  v = String(v == null ? "" : v);
+  return (/[",\\n\\r]/.test(v)) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}}
+function stamp() {{
+  var d = new Date(), p = function(n){{ return String(n).padStart(2, "0"); }};
+  return d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes());
+}}
+function doExport(fmt) {{
+  var ids = {{}};
+  filtered().forEach(function(p) {{ ids[p.id] = 1; }});
+  var note = document.getElementById("expnote");
+  note.textContent = (lang === "zh" ? "正在准备导出…" : "Preparing export…");
+  fetch("postings.json").then(function(r) {{
+    if (!r.ok) throw new Error("fetch failed");
+    return r.json();
+  }}).then(function(all) {{
+    var rows = all.filter(function(p) {{ return ids[p.id]; }});
+    var capped = false;
+    if (rows.length > EXPORT_CAP) {{ rows = rows.slice(0, EXPORT_CAP); capped = true; }}
+    var blob, name = "job-signals-" + stamp();
+    if (fmt === "csv") {{
+      var head = ["id","title","company","location","category","skills","url","posted_at","source","description"];
+      var lines = [head.join(",")];
+      rows.forEach(function(p) {{
+        lines.push(head.map(function(k) {{
+          var v = p[k];
+          if (k === "skills" && Array.isArray(v)) v = v.join("; ");
+          return csvCell(v);
+        }}).join(","));
+      }});
+      blob = new Blob(["\\ufeff" + lines.join("\\n")], {{type: "text/csv;charset=utf-8"}});
+      name += ".csv";
+    }} else {{
+      blob = new Blob([JSON.stringify(rows, null, 2)], {{type: "application/json"}});
+      name += ".json";
+    }}
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function() {{ URL.revokeObjectURL(a.href); a.remove(); }}, 4000);
+    note.textContent = (lang === "zh" ? "已导出 " : "Exported ") + rows.length
+      + (lang === "zh" ? " 条记录" : " records") + (capped ? (lang === "zh" ? "（已达上限 2,000）" : " (capped at 2,000)") : "")
+      + (lang === "zh" ? "。" : ".");
+  }}).catch(function() {{
+    note.textContent = (lang === "zh" ? "导出失败，请稍后重试。" : "Export failed, please try again.");
+  }});
+}}
 function setLang(l) {{
   lang = l;
   document.querySelectorAll('.lang-en').forEach(function(e){{e.style.display=(l==='en')?'':'none'}});
@@ -223,4 +281,7 @@ render();
 
 with open("index.html", "w") as f:
     f.write(page)
+with open("postings.json", "w") as f:
+    json.dump(full, f, ensure_ascii=False)
 print(f"dashboard written: {total} postings, {len(data)} embedded, {len(json_data)//1024}KB json")
+print(f"postings.json written: {len(full)} full records")
