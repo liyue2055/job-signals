@@ -78,27 +78,38 @@ def db():
 
 # ---------------- sources ----------------
 def greenhouse(con, board):
-    """Returns (fetched, inserted). Detail endpoint needed for full description."""
+    """Returns (fetched, inserted). Detail endpoint needed for full description.
+    Incremental: details are fetched only for jobs not already stored with a
+    description, so repeat runs cost ~1 list request per board."""
     fetched = ins = 0
     try:
         data = fetch(f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs")
     except Exception as e:
         return 0, 0, f"list failed: {e}"
     jobs = data.get("jobs", [])
+    have = {r[0] for r in con.execute(
+        "SELECT source_id FROM postings WHERE source='greenhouse' "
+        "AND description IS NOT NULL AND TRIM(description)<>''")}
     rows = []
-    for j in jobs[:DETAIL_CAP_PER_BOARD]:
+    detail_n = 0
+    for j in jobs:
         jid = str(j.get("id"))
+        sid = f"{board}:{jid}"
         fetched += 1
+        if sid in have or detail_n >= DETAIL_CAP_PER_BOARD:
+            continue
         try:
             d = fetch(f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{jid}")
-            desc = clean_html(d.get("description", ""))
+            # 2026-10: Greenhouse detail payload renamed description -> content
+            desc = clean_html(d.get("content") or d.get("description", ""))
             loc = (d.get("location") or {}).get("name", "")
             posted = d.get("updated_at", "")
+            detail_n += 1
         except Exception:
             desc, loc, posted = "", (j.get("location") or {}).get("name", ""), ""
         title = j.get("title", "")
         cat = classify(title, desc)
-        rows.append(("greenhouse", f"{board}:{jid}", board, title, loc, cat, desc,
+        rows.append(("greenhouse", sid, board, title, loc, cat, desc,
                      json.dumps(extract_skills(title, desc)),
                      j.get("absolute_url", ""), posted))
         time.sleep(SLEEP)
