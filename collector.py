@@ -4,14 +4,16 @@
 No login, no scraping gray area. Polite: timeouts, UA header, ~1 req/sec.
 Run:  cd ~/workspace/job-tracker && python3 collector.py
 """
-import json, re, sqlite3, time, html as ihtml, sys
+import json, re, sqlite3, time, html as ihtml, sys, os
 from datetime import datetime, timezone
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 DB = "jobs.db"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; job-signals/1.0; research)"}
-DETAIL_CAP_PER_BOARD = 120   # full-description fetches per greenhouse board
+# full-description fetches per greenhouse board per run; lower for bulk imports,
+# later runs converge incrementally. Override: DETAIL_CAP_PER_BOARD=25
+DETAIL_CAP_PER_BOARD = int(os.environ.get("DETAIL_CAP_PER_BOARD", "120"))
 SLEEP = 1.0
 
 # ---------------- fetch ----------------
