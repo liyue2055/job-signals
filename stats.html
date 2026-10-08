@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Signals — admin stats</title>
+<style>
+*{box-sizing:border-box}body{font-family:Georgia,'Times New Roman',serif;background:#f7f2e9;color:#2b2620;margin:0;line-height:1.7}
+body:lang(zh-CN){font-family:"Noto Serif SC","Songti SC",Georgia,serif}
+header{text-align:center;padding:44px 20px 16px;max-width:1020px;margin:0 auto}
+.kicker{font-size:.8rem;letter-spacing:3px;color:#b39b6d;text-transform:uppercase}
+h1{font-size:2rem;margin:10px 0 6px}p.sub{color:#8a7f6d;font-style:italic;margin:0 0 16px}
+.lang-toggle{display:inline-flex;border:1px solid #d8cba8;border-radius:30px;overflow:hidden;background:#fffdf8}
+.lang-btn{font-family:ui-sans-serif,system-ui;font-size:.85rem;font-weight:700;padding:8px 22px;border:none;background:transparent;color:#8a7f6d;cursor:pointer}
+.lang-btn.active{background:#1b1e26;color:#fff}
+main{max-width:1020px;margin:0 auto;padding:10px 20px 60px}
+.card{background:#fffdf8;border:1px solid #e8dfcd;border-radius:14px;padding:24px 28px;margin:22px 0;box-shadow:0 2px 10px rgba(90,70,40,.06)}
+h2{font-size:1.3rem;margin:0 0 12px}
+.stats{display:flex;gap:14px;flex-wrap:wrap}
+.stat{flex:1;min-width:150px;background:#f6f1e4;border-radius:10px;padding:14px 18px;text-align:center}
+.stat .v{font-size:1.9rem;font-weight:800}.stat .l{font-size:.82rem;color:#8a7f6d}
+.brow{display:flex;align-items:center;gap:12px;margin:9px 0}
+.blabel{width:130px;font-weight:700;font-size:.92rem}
+.btrack{flex:1;background:#efe7d3;border-radius:6px;height:16px}
+.bfill{background:linear-gradient(90deg,#3b82f6,#2dd4bf);height:16px;border-radius:6px}
+.bnum{width:60px;text-align:right;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #efe7d3;vertical-align:top}
+th{color:#8a7f6d;font-weight:700}td.num{text-align:right;font-variant-numeric:tabular-nums}
+a{color:#0a66c2}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}
+.dot.ok{background:#22c55e}.dot.bad{background:#ef4444}
+footer{text-align:center;color:#8a7f6d;font-size:.85rem;padding:0 20px 40px;font-style:italic}
+.note{color:#8a7f6d;font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+<div class="kicker">admin</div>
+<div class="lang-en"><h1>Job Signals — stats</h1><p class="sub">Collection health, source mix, job kinds and release timing.</p></div>
+<div class="lang-zh" style="display:none"><h1>职位信号——管理统计</h1><p class="sub">抓取健康状况、数据来源、职位类别与发布时间分布。</p></div>
+<div class="lang-toggle"><button class="lang-btn active" data-lang="en" onclick="setLang('en')">English</button><button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button></div>
+</header>
+<main>
+<div class="card">
+<div class="lang-en"><h2>Overview</h2></div>
+<div class="lang-zh" style="display:none"><h2>总览</h2></div>
+<div class="stats">
+<div class="stat"><div class="v">1095</div><div class="l"><span class="lang-en">postings</span><span class="lang-zh" style="display:none">职位</span></div></div>
+<div class="stat"><div class="v">9</div><div class="l"><span class="lang-en">boards</span><span class="lang-zh" style="display:none">招聘渠道</span></div></div>
+<div class="stat"><div class="v">2</div><div class="l"><span class="lang-en">ATS platforms</span><span class="lang-zh" style="display:none">ATS 平台</span></div></div>
+<div class="stat"><div class="v">5</div><div class="l"><span class="lang-en">categories</span><span class="lang-zh" style="display:none">类别</span></div></div>
+<div class="stat"><div class="v">30</div><div class="l"><span class="lang-en">recent pulls logged</span><span class="lang-zh" style="display:none">最近抓取记录</span></div></div>
+</div>
+<p class="note"><span class="lang-en">Generated</span><span class="lang-zh" style="display:none">生成于</span>: 2026-10-08 16:56 · <a href="index.html"><span class="lang-en">back to dashboard</span><span class="lang-zh" style="display:none">返回看板</span></a></p>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Sources — where the data comes from</h2></div>
+<div class="lang-zh" style="display:none"><h2>数据来源</h2></div>
+<table><thead><tr>
+<th><span class="lang-en">Board</span><span class="lang-zh" style="display:none">渠道</span></th>
+<th>ATS</th>
+<th><span class="lang-en">Postings</span><span class="lang-zh" style="display:none">职位</span></th><th></th>
+<th><span class="lang-en">Share</span><span class="lang-zh" style="display:none">占比</span></th>
+<th><span class="lang-en">Last pull</span><span class="lang-zh" style="display:none">上次抓取</span></th>
+<th><span class="lang-en">Fetched→new</span><span class="lang-zh" style="display:none">抓取→新增</span></th>
+<th><span class="lang-en">Note</span><span class="lang-zh" style="display:none">备注</span></th>
+</tr></thead><tbody>
+<tr><td><span class="dot ok"></span>datadog</td><td>greenhouse</td><td class="num">243</td><td><div class="btrack"><div class="bfill" style="width:100%"></div></div></td><td class="num">22.2%</td><td>2026-10-08 16:25:51</td><td class="num">438→120</td><td>ok</td></tr><tr><td><span class="dot ok"></span>anthropic</td><td>greenhouse</td><td class="num">239</td><td><div class="btrack"><div class="bfill" style="width:98%"></div></div></td><td class="num">21.8%</td><td>2026-10-08 16:18:14</td><td class="num">646→120</td><td>ok</td></tr><tr><td><span class="dot ok"></span>ramp</td><td>ashby</td><td class="num">162</td><td><div class="btrack"><div class="bfill" style="width:66%"></div></div></td><td class="num">14.8%</td><td>2026-10-08 16:21:14</td><td class="num">161→0</td><td>ok</td></tr><tr><td><span class="dot ok"></span>figma</td><td>greenhouse</td><td class="num">151</td><td><div class="btrack"><div class="bfill" style="width:62%"></div></div></td><td class="num">13.8%</td><td>2026-10-08 16:19:41</td><td class="num">151→34</td><td>ok</td></tr><tr><td><span class="dot ok"></span>notion</td><td>ashby</td><td class="num">135</td><td><div class="btrack"><div class="bfill" style="width:55%"></div></div></td><td class="num">12.3%</td><td>2026-10-08 16:20:23</td><td class="num">135→1</td><td>ok</td></tr><tr><td><span class="dot ok"></span>ashby</td><td>ashby</td><td class="num">70</td><td><div class="btrack"><div class="bfill" style="width:28%"></div></div></td><td class="num">6.4%</td><td>2026-10-08 16:26:15</td><td class="num">68→1</td><td>ok</td></tr><tr><td><span class="dot ok"></span>duolingo</td><td>greenhouse</td><td class="num">58</td><td><div class="btrack"><div class="bfill" style="width:23%"></div></div></td><td class="num">5.3%</td><td>2026-10-08 16:25:52</td><td class="num">58→0</td><td>ok</td></tr><tr><td><span class="dot ok"></span>linear</td><td>ashby</td><td class="num">31</td><td><div class="btrack"><div class="bfill" style="width:12%"></div></div></td><td class="num">2.8%</td><td>2026-10-08 16:26:25</td><td class="num">31→0</td><td>ok</td></tr><tr><td><span class="dot ok"></span>netlify</td><td>greenhouse</td><td class="num">6</td><td><div class="btrack"><div class="bfill" style="width:2%"></div></div></td><td class="num">0.5%</td><td>2026-10-08 16:25:53</td><td class="num">6→0</td><td>ok</td></tr>
+</tbody></table>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Job kinds — by category</h2></div>
+<div class="lang-zh" style="display:none"><h2>职位类别分布</h2></div>
+<div class="brow"><div class="blabel"><span class="lang-en">engineering</span><span class="lang-zh" style="display:none">工程技术</span></div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bnum">1079</div></div><div class="brow"><div class="blabel"><span class="lang-en">marketing</span><span class="lang-zh" style="display:none">市场营销</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">7</div></div><div class="brow"><div class="blabel"><span class="lang-en">sales</span><span class="lang-zh" style="display:none">销售</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">7</div></div><div class="brow"><div class="blabel"><span class="lang-en">hr</span><span class="lang-zh" style="display:none">人力资源</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">1</div></div><div class="brow"><div class="blabel"><span class="lang-en">product</span><span class="lang-zh" style="display:none">产品</span></div><div class="btrack"><div class="bfill" style="width:2%"></div></div><div class="bnum">1</div></div>
+</div>
+<div class="card">
+<div class="lang-en"><h2>When released — postings by week</h2></div>
+<div class="lang-zh" style="display:none"><h2>发布时间——按周</h2></div>
+<div class="brow"><div class="blabel">w/c Aug 17</div><div class="btrack"><div class="bfill" style="width:21%"></div></div><div class="bnum">70</div></div><div class="brow"><div class="blabel">w/c Aug 24</div><div class="btrack"><div class="bfill" style="width:24%"></div></div><div class="bnum">77</div></div><div class="brow"><div class="blabel">w/c Aug 31</div><div class="btrack"><div class="bfill" style="width:17%"></div></div><div class="bnum">57</div></div><div class="brow"><div class="blabel">w/c Sep 07</div><div class="btrack"><div class="bfill" style="width:14%"></div></div><div class="bnum">45</div></div><div class="brow"><div class="blabel">w/c Sep 14</div><div class="btrack"><div class="bfill" style="width:14%"></div></div><div class="bnum">46</div></div><div class="brow"><div class="blabel">w/c Sep 21</div><div class="btrack"><div class="bfill" style="width:24%"></div></div><div class="bnum">78</div></div><div class="brow"><div class="blabel">w/c Sep 28</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bnum">319</div></div><div class="brow"><div class="blabel">w/c Oct 05</div><div class="btrack"><div class="bfill" style="width:28%"></div></div><div class="bnum">91</div></div>
+<p class="note"><span class="lang-en">Based on each posting's published date (posted_at), last 8 weeks.</span><span class="lang-zh" style="display:none">基于每条职位的发布时间，最近 8 周。</span></p>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Collected per day</h2></div>
+<div class="lang-zh" style="display:none"><h2>每日新增入库</h2></div>
+<div class="brow"><div class="blabel">2026-10-07</div><div class="btrack"><div class="bfill" style="width:100%"></div></div><div class="bnum">808</div></div><div class="brow"><div class="blabel">2026-10-08</div><div class="btrack"><div class="bfill" style="width:35%"></div></div><div class="bnum">287</div></div>
+</div>
+<div class="card">
+<div class="lang-en"><h2>Ingest history — last 30 pulls</h2></div>
+<div class="lang-zh" style="display:none"><h2>抓取历史——最近 30 次</h2></div>
+<table><thead><tr>
+<th><span class="lang-en">Time</span><span class="lang-zh" style="display:none">时间</span></th>
+<th><span class="lang-en">Board</span><span class="lang-zh" style="display:none">渠道</span></th>
+<th><span class="lang-en">Fetched</span><span class="lang-zh" style="display:none">抓取</span></th>
+<th><span class="lang-en">New</span><span class="lang-zh" style="display:none">新增</span></th>
+<th><span class="lang-en">Note</span><span class="lang-zh" style="display:none">备注</span></th>
+</tr></thead><tbody>
+<tr><td>2026-10-08 16:26:25</td><td>ashby:linear</td><td class="num">31</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:26:15</td><td>ashby:ashby</td><td class="num">68</td><td class="num">1</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:25:53</td><td>greenhouse:netlify</td><td class="num">6</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:25:52</td><td>greenhouse:duolingo</td><td class="num">58</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:25:51</td><td>greenhouse:datadog</td><td class="num">438</td><td class="num">120</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:21:14</td><td>ashby:ramp</td><td class="num">161</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:20:23</td><td>ashby:notion</td><td class="num">135</td><td class="num">1</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:19:41</td><td>greenhouse:figma</td><td class="num">151</td><td class="num">34</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 16:18:14</td><td>greenhouse:anthropic</td><td class="num">646</td><td class="num">120</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:27:18</td><td>ashby:linear</td><td class="num">31</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:27:08</td><td>ashby:ashby</td><td class="num">68</td><td class="num">2</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:26:46</td><td>greenhouse:netlify</td><td class="num">6</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:26:35</td><td>greenhouse:duolingo</td><td class="num">59</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:24:48</td><td>greenhouse:datadog</td><td class="num">120</td><td class="num">3</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:21:16</td><td>ashby:ramp</td><td class="num">161</td><td class="num">2</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:20:26</td><td>ashby:notion</td><td class="num">134</td><td class="num">1</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:19:44</td><td>greenhouse:figma</td><td class="num">120</td><td class="num">1</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-08 04:16:29</td><td>greenhouse:anthropic</td><td class="num">120</td><td class="num">2</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:14:42</td><td>ashby:linear</td><td class="num">31</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:14:32</td><td>ashby:ashby</td><td class="num">66</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:14:11</td><td>greenhouse:netlify</td><td class="num">6</td><td class="num">6</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:14:00</td><td>greenhouse:duolingo</td><td class="num">60</td><td class="num">60</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:12:17</td><td>greenhouse:datadog</td><td class="num">120</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:08:48</td><td>ashby:ramp</td><td class="num">160</td><td class="num">160</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:07:58</td><td>ashby:notion</td><td class="num">133</td><td class="num">133</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:07:16</td><td>greenhouse:figma</td><td class="num">120</td><td class="num">1</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 17:03:55</td><td>greenhouse:anthropic</td><td class="num">120</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 16:25:42</td><td>ashby:linear</td><td class="num">31</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 16:25:32</td><td>ashby:ashby</td><td class="num">66</td><td class="num">0</td><td><span class="dot ok"></span>ok</td></tr><tr><td>2026-10-07 16:25:11</td><td>lever:netlify</td><td class="num">0</td><td class="num">0</td><td><span class="dot bad"></span>failed: HTTP Error 404: Not Found</td></tr>
+</tbody></table>
+</div>
+</main>
+<footer><span class="lang-en">Job Signals · admin stats · generated with each collection</span><span class="lang-zh" style="display:none">职位信号 · 管理统计 · 随每次抓取自动生成</span></footer>
+<script>
+function setLang(l) {
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=(l==='en')?'':'none'});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=(l==='zh')?'':'none'});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});
+  document.documentElement.lang=(l==='zh')?'zh-CN':'en';
+}
+</script>
+</body>
+</html>
