@@ -67,8 +67,17 @@ SKILLS = ["python", "typescript", "javascript", "react", "go ", "golang", "rust"
     "vue", "angular", "flutter", "react native", "tableau", "looker",
     "salesforce", "hubspot", "seo", "excel", "a/b testing"]
 def extract_skills(title, desc):
+    # Word-boundary matching: plain substring search false-positives badly
+    # ("rag" in storage/coverage, "rust" in trust, "aws" in laws).
+    # Fixed 2026-11-19; existing rows in jobs.db still carry the old tags
+    # until a backfill re-runs this function over stored descriptions.
     t = (" " + title + " " + desc + " ").lower()
-    return sorted({s.strip() for s in SKILLS if s in t})
+    found = set()
+    for s in SKILLS:
+        s = s.strip()
+        if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", t):
+            found.add(s)
+    return sorted(found)
 
 # ---------------- db ----------------
 def db():
