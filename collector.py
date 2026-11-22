@@ -57,8 +57,8 @@ def classify(title, desc):
             return cat
     return "other"
 
-SKILLS = ["python", "typescript", "javascript", "react", "go ", "golang", "rust",
-    "java ", "kotlin", "swift", "c++", "sql", "kubernetes", "docker", "aws",
+SKILLS = ["python", "typescript", "javascript", "react", "rust",
+    "java", "kotlin", "swift", "c++", "sql", "kubernetes", "docker", "aws",
     "gcp", "azure", "terraform", "pytorch", "tensorflow", "scikit", "llm",
     "rag", "prompt engineering", "machine learning", "deep learning", "nlp",
     "computer vision", "data pipeline", "spark", "airflow", "dbt", "figma",
@@ -66,6 +66,20 @@ SKILLS = ["python", "typescript", "javascript", "react", "go ", "golang", "rust"
     "elasticsearch", "kafka", "ci/cd", "github actions", "node.js", "next.js",
     "vue", "angular", "flutter", "react native", "tableau", "looker",
     "salesforce", "hubspot", "seo", "excel", "a/b testing"]
+# Go is matched separately, never as a bare word: ordinary English "go"
+# (go-to-market, go-live, "Grow as you go") swamped the tag — all 225
+# Figma postings carried it. Count the language only on "golang" or an
+# explicit language context (role/stack phrasing, or list-adjacency to
+# another programming language). Fixed 2026-11-21.
+GO_CONTEXT = re.compile(
+    r"golang"
+    r"|go (language|programming|developer|developers|engineer|engineers"
+    r"|development|backend|programmer|programmers|codebase)"
+    r"|(programming|coding|written|developed|built|experience) in go(?![a-z0-9])"
+    r"|(?<![a-z0-9])go\s*[,/]\s*(python|java|rust|kotlin|typescript|javascript|scala|c\+\+)"
+    r"|(python|java|rust|kotlin|typescript|javascript|scala|c\+\+)\s*[,/]\s*go(?![a-z0-9])"
+)
+
 def extract_skills(title, desc):
     # Word-boundary matching: plain substring search false-positives badly
     # ("rag" in storage/coverage, "rust" in trust, "aws" in laws).
@@ -77,6 +91,8 @@ def extract_skills(title, desc):
         s = s.strip()
         if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", t):
             found.add(s)
+    if GO_CONTEXT.search(t):
+        found.add("go")
     return sorted(found)
 
 # ---------------- db ----------------
